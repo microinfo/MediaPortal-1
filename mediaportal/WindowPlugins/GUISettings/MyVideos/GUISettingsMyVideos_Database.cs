@@ -854,21 +854,33 @@ namespace MediaPortal.GUI.Settings
         }
       }
       _conflictFiles = new ArrayList();
+      ArrayList nfoFiles = new ArrayList();
+
+      foreach (string availablePath in availablePaths)
+      {
+        GetNfoFiles(availablePath, ref nfoFiles);
+      }
 
       if (!btnUseNfoScraper.Selected)
       {
-        IMDBFetcher.ScanIMDB(this, availablePaths, btnNearestmatch.Selected, btnSkipalreadyexisting.Selected, false,
-                             btnRefreshexistingonly.Selected);
-      }
-      else
-      {
-        ArrayList nfoFiles = new ArrayList();
-
-        foreach (string availablePath in availablePaths)
+        // Scan only new movies (skip scan existing movies or not refreshing existing)
+        if (btnSkipalreadyexisting.Selected && !btnRefreshexistingonly.Selected)
         {
-          GetNfoFiles(availablePath, ref nfoFiles);
-        }
+          // First nfo (can speed up scan time)
+          IMDBFetcher fetcher = new IMDBFetcher(this);
+          fetcher.FetchNfo(nfoFiles, true, false);
+          // Then video files (for movies not added by nfo)
+          IMDBFetcher.ScanIMDB(this, availablePaths, btnNearestmatch.Selected, true, false, false);
 
+        }
+        else // User wants to scan no matter if movies are already in the database (do not use nfo here, user must set that option)
+        {
+          IMDBFetcher.ScanIMDB(this, availablePaths, btnNearestmatch.Selected, btnSkipalreadyexisting.Selected, false,
+                             btnRefreshexistingonly.Selected);
+        }
+      }
+      else // Use only nfo files
+      {
         IMDBFetcher fetcher = new IMDBFetcher(this);
         fetcher.FetchNfo(nfoFiles, btnSkipalreadyexisting.Selected, btnRefreshexistingonly.Selected);
       }

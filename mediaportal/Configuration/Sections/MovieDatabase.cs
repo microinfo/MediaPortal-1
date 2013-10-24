@@ -346,6 +346,7 @@ namespace MediaPortal.Configuration.Sections
         }
       }
       
+      // Use nfo files only (option is selected in configuration)
       if (chbUseNfoScraperOnly.Checked)
       {
         _nfoFiles = new ArrayList();
@@ -366,8 +367,28 @@ namespace MediaPortal.Configuration.Sections
       else
       {
         _conflictFiles = new ArrayList();
-        IMDBFetcher.ScanIMDB(this, availablePaths, _isFuzzyMatching, skipCheckBox.Checked, true,
+        
+        // To scan only new movies, we will use help of nfo files if they exist, then video files for movies
+        // not added by nfo files
+        if (skipCheckBox.Checked && !refreshdbCheckBox.Checked)
+        {
+          _nfoFiles = new ArrayList();
+
+          // First use nfo files
+          foreach (string availablePath in availablePaths)
+          {
+            GetNfoFiles(availablePath, ref _nfoFiles);
+            ImportNfo();
+          }
+          // Then video files (only not added with nfo)
+          IMDBFetcher.ScanIMDB(this, availablePaths, _isFuzzyMatching, true, true,
+                             false);
+        }
+        else // USer wants to scan no matter if movies exist or wants to refresh db, nfo files are not used
+        {
+          IMDBFetcher.ScanIMDB(this, availablePaths, _isFuzzyMatching, skipCheckBox.Checked, true,
                              refreshdbCheckBox.Checked);
+        }
       }
       
       LoadMovies(0);
