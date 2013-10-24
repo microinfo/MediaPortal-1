@@ -37,6 +37,9 @@ namespace MediaPortal.Configuration
   /// </summary>
   public class Startup
   {
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetProcessDPIAware();
+
     public static bool _automaticMovieCodec = false;
     public static bool _automaticMovieFilter = false;
     public static bool _automaticBDCodec = false;
@@ -255,6 +258,11 @@ namespace MediaPortal.Configuration
     {
       try
       {
+        if (Environment.OSVersion.Version.Major >= 6)
+        {
+          SetProcessDPIAware();
+        }
+
         AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
         Application.EnableVisualStyles();
         Application.DoEvents();
