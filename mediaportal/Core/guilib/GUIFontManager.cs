@@ -168,7 +168,8 @@ namespace MediaPortal.GUI.Library
 
                 // adjust for different DPI settings (96dpi = 100%)
                 Graphics graphics = GUIGraphicsContext.form.CreateGraphics();
-                baseSize *= graphics.DpiY / 96;
+                // With DPIAware setting baseSize need to be kept
+                baseSize *= graphics.DpiY / graphics.DpiY;
 
                 float fPercent = (GUIGraphicsContext.Height * GUIGraphicsContext.ZoomVertical) / baseSize;
                 fPercent *= iHeight;
